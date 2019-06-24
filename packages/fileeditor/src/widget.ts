@@ -1,7 +1,15 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { StackedLayout, Widget } from '@phosphor/widgets';
+import { BoxLayout, Widget } from '@phosphor/widgets';
+
+import {
+  Dialog,
+  DOMUtils,
+  showDialog,
+  Toolbar,
+  ToolbarButton
+} from '@jupyterlab/apputils';
 
 import {
   ABCWidgetFactory,
@@ -162,7 +170,9 @@ export class FileEditor extends Widget {
    */
   constructor(options: FileEditor.IOptions) {
     super();
+    this.addClass('jp-MainAreaWidget');
     this.addClass('jp-FileEditor');
+    this.id = DOMUtils.createDomID();
 
     const context = (this._context = options.context);
     this._mimeTypeService = options.mimeTypeService;
@@ -175,9 +185,38 @@ export class FileEditor extends Widget {
     context.pathChanged.connect(this._onPathChanged, this);
     this._onPathChanged();
 
-    let layout = (this.layout = new StackedLayout());
+    let testButton = new ToolbarButton({
+      iconClassName: 'fa fa-send',
+      label: 'Run something...',
+      onClick: this.showWidget,
+      tooltip: 'Test button'
+    });
+
+    console.log('Adding toolbar...');
+    const toolbar = new Toolbar();
+
+    console.log('Adding toolbar button...');
+    toolbar.addItem('test', testButton);
+
+    let layout = (this.layout = new BoxLayout({ spacing: 0 }));
+    layout.direction = 'top-to-bottom';
+    BoxLayout.setStretch(toolbar, 0);
+    BoxLayout.setStretch(editorWidget, 1);
+    layout.addWidget(toolbar);
     layout.addWidget(editorWidget);
+
+    if (!editorWidget.id) {
+      editorWidget.id = DOMUtils.createDomID();
+    }
+    editorWidget.node.tabIndex = -1;
   }
+
+  showWidget = () => {
+    showDialog({
+      title: 'Test button',
+      buttons: [Dialog.cancelButton(), Dialog.okButton()]
+    });
+  };
 
   /**
    * Get the context for the editor widget.
