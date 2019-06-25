@@ -188,7 +188,7 @@ export class FileEditor extends Widget {
     let testButton = new ToolbarButton({
       iconClassName: 'fa fa-send',
       label: 'Run something...',
-      onClick: this.showWidget,
+      onClick: this.runPythonCode,
       tooltip: 'Test button'
     });
 
@@ -211,11 +211,9 @@ export class FileEditor extends Widget {
     editorWidget.node.tabIndex = -1;
   }
 
-  showWidget = () => {
-    showDialog({
-      title: 'Test button',
-      buttons: [Dialog.cancelButton(), Dialog.okButton()]
-    });
+  runPythonCode = () => {
+    let code = this.model.value.text;
+    console.log('Code: ' + code);
   };
 
   /**
