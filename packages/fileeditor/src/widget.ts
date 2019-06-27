@@ -2,14 +2,9 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { BoxLayout, Widget } from '@phosphor/widgets';
+import { Kernel } from '@jupyterlab/services';
 
-import {
-  Dialog,
-  DOMUtils,
-  showDialog,
-  Toolbar,
-  ToolbarButton
-} from '@jupyterlab/apputils';
+import { DOMUtils, Toolbar, ToolbarButton } from '@jupyterlab/apputils';
 
 import {
   ABCWidgetFactory,
@@ -187,8 +182,8 @@ export class FileEditor extends Widget {
 
     let testButton = new ToolbarButton({
       iconClassName: 'fa fa-send',
-      label: 'Run something...',
-      onClick: this.runPythonCode,
+      label: 'Run code',
+      onClick: this.runPython,
       tooltip: 'Test button'
     });
 
@@ -211,9 +206,72 @@ export class FileEditor extends Widget {
     editorWidget.node.tabIndex = -1;
   }
 
-  runPythonCode = () => {
-    let code = this.model.value.text;
+  runPython = async () => {
+    let model = this.model;
+    let code: string = model.value.text;
     console.log('Code: ' + code);
+
+    const kernelSpecs = await this.getKernelSpecs();
+    const kernelSettings: Kernel.IOptions = { name: kernelSpecs.default };
+    const kernel = await this.startKernel(kernelSettings);
+    const future = kernel.requestExecute({ code: code });
+
+    future.onIOPub = msg => {
+      if ('name' in msg.content && msg.content.name === 'stdout') {
+        let output = msg.content.text;
+        console.log('Output:\n' + output);
+      }
+    };
+
+    future.done.then(() => {
+      console.log('Done. Shutting down ' + kernel.name + ' kernel...');
+      this.shutDownKernel(kernel);
+    });
+
+    // Kernel.getSpecs().then( kernelSpecs => {
+    //     console.log('Default spec:', kernelSpecs.default);
+    //     console.log('Available specs:', Object.keys(kernelSpecs.kernelspecs));
+
+    //     let options: Kernel.IOptions = { name: kernelSpecs.default };
+    //     this.startKernel(code, options);
+    // });
+  };
+
+  getKernelSpecs = async () => {
+    const kernelSpecs = await Kernel.getSpecs();
+    console.log('Default spec:', kernelSpecs.default);
+    console.log('Available specs:', Object.keys(kernelSpecs.kernelspecs));
+    return kernelSpecs;
+  };
+
+  startKernel = async (options: Kernel.IOptions) => {
+    return Kernel.startNew(options);
+  };
+
+  // startKernel = (code:string, options: any) => {
+  //   Kernel.startNew(options).then( kernel => {
+  //       // Execute and handle replies
+  //       const future = kernel.requestExecute({ code: code });
+  //       future.done.then(() => {
+  //         console.log('Done. Shutting down ' + kernel.name + ' kernel...');
+  //         this.shutDownKernel(kernel);
+  //       });
+
+  //       future.onIOPub = msg => {
+  //         // Print stdout
+  //         if ('name' in msg.content && msg.content.name === 'stdout'){
+  //           let output = msg.content.text;
+  //           console.log('Output:\n' + output);
+  //         }
+  //       };
+  //   });
+  // };
+
+  shutDownKernel = (kernel: any) => {
+    // Kill the kernel. TODO: need to pass kernel id
+    kernel.shutdown().then(() => {
+      console.log('Kernel shut down');
+    });
   };
 
   /**
