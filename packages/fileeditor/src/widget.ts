@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { BoxLayout, Widget } from '@phosphor/widgets';
+
 import { Kernel } from '@jupyterlab/services';
 
 import { DOMUtils, Toolbar, ToolbarButton } from '@jupyterlab/apputils';
@@ -182,6 +183,7 @@ export class FileEditor extends Widget {
 
     let testButton = new ToolbarButton({
       iconClassName: 'fa fa-send',
+
       label: 'Run code',
       onClick: this.runPython,
       tooltip: 'Test button'
@@ -227,14 +229,6 @@ export class FileEditor extends Widget {
       console.log('Done. Shutting down ' + kernel.name + ' kernel...');
       this.shutDownKernel(kernel);
     });
-
-    // Kernel.getSpecs().then( kernelSpecs => {
-    //     console.log('Default spec:', kernelSpecs.default);
-    //     console.log('Available specs:', Object.keys(kernelSpecs.kernelspecs));
-
-    //     let options: Kernel.IOptions = { name: kernelSpecs.default };
-    //     this.startKernel(code, options);
-    // });
   };
 
   getKernelSpecs = async () => {
@@ -247,25 +241,6 @@ export class FileEditor extends Widget {
   startKernel = async (options: Kernel.IOptions) => {
     return Kernel.startNew(options);
   };
-
-  // startKernel = (code:string, options: any) => {
-  //   Kernel.startNew(options).then( kernel => {
-  //       // Execute and handle replies
-  //       const future = kernel.requestExecute({ code: code });
-  //       future.done.then(() => {
-  //         console.log('Done. Shutting down ' + kernel.name + ' kernel...');
-  //         this.shutDownKernel(kernel);
-  //       });
-
-  //       future.onIOPub = msg => {
-  //         // Print stdout
-  //         if ('name' in msg.content && msg.content.name === 'stdout'){
-  //           let output = msg.content.text;
-  //           console.log('Output:\n' + output);
-  //         }
-  //       };
-  //   });
-  // };
 
   shutDownKernel = (kernel: any) => {
     // Kill the kernel. TODO: need to pass kernel id
