@@ -20,8 +20,18 @@ To install ``xeus-python`` in a new ``conda`` environment:
 
 .. code:: bash
 
-   conda create -n jupyterlab-debugger -c conda-forge jupyterlab=3 xeus-python
+   conda create -n jupyterlab-debugger -c conda-forge
    conda activate jupyterlab-debugger
+   pip install --pre --upgrade jupyterlab
+   pip install xeus-python">=0.9.0,<0.10.0"
+
+Notes
+-----
+
+If using ``conda-forge`` to install ``xeus-python``:
+
+- For Python 3.6:    :code:`conda install -y xeus-python"<=0.8.6" -c conda-forge`
+- For Python >= 3.7: :code:`conda install -y xeus-python">=0.8.0,<0.9.0" -c conda-forge`
 
 Usage
 -----
